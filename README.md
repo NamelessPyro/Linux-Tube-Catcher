@@ -1,5 +1,6 @@
-Linux port of aTube Catcher for Linux Mint 22.1 Cinnamon. This application provides video downloading and conversion capabilities similar to the original aTube Catcher but designed specifically for Linux systems.inux Tube Catcher
+Linux port of aTube Catcher for Linux Mint 22.1 Cinnamon. This application provides video downloading and conversion capabilities similar to the original aTube Catcher but designed specifically for Linux systems.
 
+Linux-Tube-Catcher
 A Linux port of aTube Catcher for Linux Mint 22.1 Cinnamon. This application provides video downloading and conversion capabilities similar to the original aTube Catcher but designed specifically for Linux systems.
 
 ## Features
