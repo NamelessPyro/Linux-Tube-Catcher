@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# Linux Tube Catcher - Uninstaller
+# Willhiem - Uninstaller
 # Created by NamelessPyro
 
 echo "=================================================="
-echo "   Linux Tube Catcher - Uninstaller"
+echo "   Willhiem - Uninstaller"
 echo "   Created by NamelessPyro"
 echo "=================================================="
 echo ""
@@ -23,11 +23,14 @@ print_warning() {
     echo -e "${YELLOW}[WARNING]${NC} $1"
 }
 
-INSTALL_DIR="$HOME/.local/share/linux-tube-catcher"
-DESKTOP_FILE="$HOME/.local/share/applications/linux-tube-catcher.desktop"
-BIN_FILE="$HOME/.local/bin/linux-tube-catcher"
+INSTALL_DIR="$HOME/.local/share/willhiem"
+DESKTOP_FILE="$HOME/.local/share/applications/willhiem.desktop"
+BIN_FILE="$HOME/.local/bin/willhiem"
+LEGACY_INSTALL_DIR="$HOME/.local/share/linux-tube-catcher"
+LEGACY_DESKTOP_FILE="$HOME/.local/share/applications/linux-tube-catcher.desktop"
+LEGACY_BIN_FILE="$HOME/.local/bin/linux-tube-catcher"
 
-echo "This will remove Linux Tube Catcher from your system."
+echo "This will remove Willhiem from your system."
 echo "The following will be deleted:"
 echo "  - $INSTALL_DIR"
 echo "  - $DESKTOP_FILE"
@@ -37,25 +40,31 @@ echo -n "Are you sure you want to uninstall? (y/N): "
 read -r response
 
 if [[ "$response" =~ ^[Yy]$ ]]; then
-    print_status "Removing Linux Tube Catcher..."
+    print_status "Removing Willhiem..."
     
     # Remove installation directory
-    if [[ -d "$INSTALL_DIR" ]]; then
-        rm -rf "$INSTALL_DIR"
-        print_status "Removed installation directory"
-    fi
+    for dir in "$INSTALL_DIR" "$LEGACY_INSTALL_DIR"; do
+        if [[ -d "$dir" ]]; then
+            rm -rf "$dir"
+            print_status "Removed installation directory: $dir"
+        fi
+    done
     
     # Remove desktop file
-    if [[ -f "$DESKTOP_FILE" ]]; then
-        rm -f "$DESKTOP_FILE"
-        print_status "Removed desktop launcher"
-    fi
+    for df in "$DESKTOP_FILE" "$LEGACY_DESKTOP_FILE"; do
+        if [[ -f "$df" ]]; then
+            rm -f "$df"
+            print_status "Removed desktop launcher: $df"
+        fi
+    done
     
     # Remove binary
-    if [[ -f "$BIN_FILE" ]]; then
-        rm -f "$BIN_FILE"
-        print_status "Removed command launcher"
-    fi
+    for bf in "$BIN_FILE" "$LEGACY_BIN_FILE"; do
+        if [[ -f "$bf" || -L "$bf" ]]; then
+            rm -f "$bf"
+            print_status "Removed command launcher: $bf"
+        fi
+    done
     
     # Update desktop database
     if command -v update-desktop-database &> /dev/null; then
@@ -63,7 +72,7 @@ if [[ "$response" =~ ^[Yy]$ ]]; then
     fi
     
     echo ""
-    print_status "✅ Linux Tube Catcher has been uninstalled successfully!"
+    print_status "✅ Willhiem has been uninstalled successfully!"
     print_warning "Note: System dependencies (python3, ffmpeg, etc.) were not removed"
     print_warning "as they may be used by other applications."
 else

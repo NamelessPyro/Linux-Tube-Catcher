@@ -1,13 +1,13 @@
 #!/bin/bash
 
-# Linux Tube Catcher - Easy Installer for General Public
+# Willhiem - Easy Installer for General Public
 # Created by NamelessPyro
-# Version 1.0
+# Version 1.7
 
 set -e  # Exit on any error
 
 echo "=================================================="
-echo "   Linux Tube Catcher - Easy Installer v1.0"
+echo "   Willhiem - Easy Installer v1.7"
 echo "   Created by NamelessPyro"
 echo "=================================================="
 echo ""
@@ -72,8 +72,8 @@ print_status "Sudo access confirmed!"
 echo ""
 
 # Set installation directory
-INSTALL_DIR="$HOME/.local/share/linux-tube-catcher"
-DESKTOP_FILE="$HOME/.local/share/applications/linux-tube-catcher.desktop"
+INSTALL_DIR="$HOME/.local/share/willhiem"
+DESKTOP_FILE="$HOME/.local/share/applications/willhiem.desktop"
 BIN_DIR="$HOME/.local/bin"
 
 print_step "Installation will be performed in: $INSTALL_DIR"
@@ -85,17 +85,16 @@ sudo apt update
 
 # Install system dependencies
 print_step "Installing system dependencies..."
-print_status "Installing: python3, python3-pip, python3-venv, python3-tkinter, ffmpeg"
+print_status "Installing: python3, python3-pip, python3-venv, ffmpeg, libxcb-cursor0"
 
-# Try to install packages, with fallbacks
-PACKAGES="python3 python3-pip python3-venv python3-tk ffmpeg"
+# Core packages - libxcb-cursor0 is required by Qt6 xcb platform plugin
+PACKAGES="python3 python3-pip python3-venv ffmpeg libxcb-cursor0"
 
-# For older systems, try alternative package names
 if ! sudo apt install -y $PACKAGES; then
-    print_warning "Trying alternative package names for older systems..."
-    sudo apt install -y python3 python3-pip python3-venv python3-tkinter ffmpeg || {
+    print_warning "Trying without libxcb-cursor0 (may not be needed on older systems)..."
+    sudo apt install -y python3 python3-pip python3-venv ffmpeg || {
         print_error "Failed to install required system packages."
-        print_error "Please manually install: python3, python3-pip, python3-venv, python3-tk/python3-tkinter, ffmpeg"
+        print_error "Please manually install: python3, python3-pip, python3-venv, ffmpeg"
         exit 1
     }
 fi
@@ -117,6 +116,7 @@ mkdir -p "$(dirname "$DESKTOP_FILE")"
 # Copy application files
 print_step "Installing application files..."
 cp linux_tube_catcher.py "$INSTALL_DIR/"
+cp vlc_theme.py "$INSTALL_DIR/" 2>/dev/null || true
 cp requirements.txt "$INSTALL_DIR/"
 cp icon.png "$INSTALL_DIR/" 2>/dev/null || print_warning "Icon file not found, will create default"
 cp README.md "$INSTALL_DIR/" 2>/dev/null || print_warning "README not found"
@@ -127,10 +127,10 @@ cd "$INSTALL_DIR"
 python3 -m venv venv
 
 # Activate virtual environment and install Python dependencies
-print_step "Installing Python dependencies..."
+print_step "Installing Python dependencies (PyQt6, yt-dlp, Pillow)..."
 source venv/bin/activate
-pip install --upgrade pip
-pip install -r requirements.txt
+pip install --upgrade pip setuptools wheel
+pip install --upgrade -r requirements.txt
 
 # Create icon if not present
 if [[ ! -f "$INSTALL_DIR/icon.png" ]]; then
@@ -163,18 +163,19 @@ print('Icon created successfully')
 " || print_warning "Could not create icon (Pillow not available)"
 fi
 
-# Create launcher script
-print_step "Creating launcher script..."
-cat > "$BIN_DIR/linux-tube-catcher" << 'EOF'
+# Create launcher scripts (willhiem and legacy alias linux-tube-catcher)
+print_step "Creating launcher scripts..."
+cat > "$BIN_DIR/willhiem" << 'EOF'
 #!/bin/bash
-# Linux Tube Catcher Launcher
-INSTALL_DIR="$HOME/.local/share/linux-tube-catcher"
+# Willhiem Launcher
+INSTALL_DIR="$HOME/.local/share/willhiem"
 cd "$INSTALL_DIR"
 source venv/bin/activate
 python3 linux_tube_catcher.py "$@"
 EOF
 
-chmod +x "$BIN_DIR/linux-tube-catcher"
+chmod +x "$BIN_DIR/willhiem"
+ln -sf "$BIN_DIR/willhiem" "$BIN_DIR/linux-tube-catcher"
 
 # Create desktop entry
 print_step "Creating desktop launcher..."
@@ -182,14 +183,13 @@ cat > "$DESKTOP_FILE" << EOF
 [Desktop Entry]
 Version=1.0
 Type=Application
-Name=Linux Tube Catcher
+Name=Willhiem
 Comment=Download and convert videos from YouTube and other platforms
-Comment[es]=Descarga y convierte videos de YouTube y otras plataformas
-Exec=$BIN_DIR/linux-tube-catcher
+Exec=$BIN_DIR/willhiem
 Icon=$INSTALL_DIR/icon.png
 Terminal=false
 Categories=AudioVideo;Video;Network;
-Keywords=video;download;youtube;converter;
+Keywords=video;download;youtube;converter;willhiem;tube;catcher;
 StartupNotify=true
 MimeType=text/uri-list;
 EOF
@@ -225,10 +225,10 @@ cd "$INSTALL_DIR"
 source venv/bin/activate
 python3 -c "
 import sys
-import tkinter as tk
+
 try:
     import yt_dlp
-    print('✓ yt-dlp available')
+    print('✓ yt-dlp available:', yt_dlp.version.__version__)
 except ImportError:
     print('✗ yt-dlp not available')
     sys.exit(1)
@@ -245,14 +245,11 @@ except Exception:
     print('✗ ffmpeg test failed')
     sys.exit(1)
 
-# Test tkinter by creating a hidden window
 try:
-    root = tk.Tk()
-    root.withdraw()  # Hide the window
-    root.destroy()
-    print('✓ tkinter working')
-except Exception as e:
-    print(f'✗ tkinter error: {e}')
+    from PyQt6.QtWidgets import QApplication
+    print('✓ PyQt6 available')
+except ImportError as e:
+    print(f'✗ PyQt6 not available: {e}')
     sys.exit(1)
 
 print('✓ All dependencies working!')
@@ -264,13 +261,13 @@ if [[ $? -eq 0 ]]; then
     print_status "✅ Installation completed successfully!"
     echo "=================================================="
     echo ""
-    echo "🚀 How to run Linux Tube Catcher:"
+    echo "🚀 How to run Willhiem:"
     echo ""
     echo "1. 📱 From Applications Menu:"
-    echo "   Search for 'Linux Tube Catcher' in your app launcher"
+    echo "   Search for 'Willhiem' in your app launcher"
     echo ""
     echo "2. 💻 From Terminal:"
-    echo "   linux-tube-catcher"
+    echo "   willhiem (or linux-tube-catcher)"
     echo "   (restart terminal first if command not found)"
     echo ""
     echo "3. 📁 Installation location:"
@@ -279,8 +276,10 @@ if [[ $? -eq 0 ]]; then
     echo "🎯 Features available:"
     echo "   • Download videos from YouTube, Vimeo, and 1000+ sites"
     echo "   • Full playlist support with smart organization"
-    echo "   • High-quality download mode for better video scaling"
-    echo "   • Convert to multiple formats (MP4, AVI, MKV, WebM, MOV)"
+    echo "   • PS3 / PS Vita 720p and 480p device presets"
+    echo "   • Xbox 360 device preset"
+    echo "   • Cookie auth for private/age-restricted videos"
+    echo "   • Convert local videos without downloading"
     echo "   • Extract audio to MP3, WAV, AAC, OGG, M4A"
     echo ""
     echo "📚 Documentation: $INSTALL_DIR/README.md"
@@ -292,3 +291,4 @@ else
     print_error "Please check the error messages above."
     exit 1
 fi
+

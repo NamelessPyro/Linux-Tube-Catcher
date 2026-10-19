@@ -1,0 +1,13 @@
+# Python virtual environment
+venv/
+.venv/
+__pycache__/
+*.pyc
+
+# Local artifacts / test logs
+/tmp/
+test_venv/
+
+# Large Figma / PDF design source files (optional to keep or ignore)
+*.fig
+*.pdf

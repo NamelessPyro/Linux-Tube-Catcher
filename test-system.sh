@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# Linux Tube Catcher - Quick Test Script
+# Willhiem - Quick Test Script
 # Tests the installation without full setup
 
-echo "🧪 Linux Tube Catcher - Quick Test"
-echo "=================================="
+echo "🧪 Willhiem - Quick Test"
+echo "========================"
 
 # Test Python
 if command -v python3 &> /dev/null; then
@@ -27,6 +27,24 @@ if python3 -c "import tkinter" 2>/dev/null; then
     echo "✓ tkinter available"
 else
     echo "✗ tkinter not available - install python3-tk"
+fi
+
+# Test yt-dlp
+if YTDLP_VERSION=$(python3 -c "import yt_dlp; print(yt_dlp.version.__version__)" 2>/dev/null); then
+    echo "✓ yt-dlp available: $YTDLP_VERSION"
+
+    python3 - <<'PY' >/dev/null 2>&1
+import sys
+import yt_dlp
+version = tuple(int(part) for part in yt_dlp.version.__version__.split('.')[:3])
+sys.exit(0 if version >= (2025, 3, 31) else 1)
+PY
+    if [[ $? -ne 0 ]]; then
+        echo "⚠ yt-dlp is outdated; recent YouTube links may fail until you upgrade it"
+        echo "  Run: python3 -m pip install --upgrade yt-dlp"
+    fi
+else
+    echo "✗ yt-dlp not available - install with: python3 -m pip install --upgrade yt-dlp"
 fi
 
 # Test ffmpeg
